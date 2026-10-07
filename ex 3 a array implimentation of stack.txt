@@ -1,6 +1,6 @@
 PROGRAM: 
 #include <stdio.h>  
-#include <stdlib.h> 
+#include <stdlib.h>
  #define MAX 100 // Maximum size of the stack  
 // Stack structure definition  
 struct Stack { 
@@ -76,46 +76,4 @@ void displayStack(struct Stack *stack) {
         printf("%d ", stack->arr[i]); 
      } 
      printf("\n"); 
-}    
-OUTPUT:  
-Stack Operations Menu:  
-1. Push  
-2. Pop  
-3. Display  
-4. Exit Enter your choice: 1 
-Enter element to push: 10  
-Element pushed: 10  
-Stack Operations Menu:  
-1. Push  
-2. Pop  
-3. Display  
-4. Exit Enter your choice: 1  
-Enter element to push: 20  
-Element pushed: 20  
-Stack Operations Menu:  
-1. Push  
-2. Pop  
-3. Display  
-4. Exit  
-Enter your choice: 3  
-Stack elements: 20 10  
-Stack Operations Menu:  
-1. Push  
-2. Pop  
-3. Display  
-4. Exit  
-Enter your choice: 2  
-Popped element: 20  
-Stack Operations Menu:  
-1. Push  
-2. Pop  
-3. Display  
-4. Exit  
-Enter your choice: 3  
-Stack elements: 10  
-Stack Operations Menu:  
-1. Push  
-2. Pop  
-3. Display  
-4. Exit  
-Enter your choice: 4 
+} 
