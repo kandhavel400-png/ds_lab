@@ -1,0 +1,184 @@
+#include <stdio.h>
+#include <string.h>
+
+#define MAX_TRAINS 10
+#define MAX_PASSENGERS 100
+#define NAME_LEN 50
+
+typedef struct {
+    int trainNo;
+    char name[NAME_LEN];
+    char source[NAME_LEN];
+    char destination[NAME_LEN];
+    int totalSeats;
+    int availableSeats;
+} Train;
+
+typedef struct {
+    int pnr;
+    int trainNo;
+    char passengerName[NAME_LEN];
+    int age;
+    int seats;
+    int active;   /* 1 = booked, 0 = cancelled */
+} Booking;
+
+Train trains[MAX_TRAINS];
+Booking bookings[MAX_PASSENGERS];
+int trainCount = 0;
+int bookingCount = 0;
+int nextPNR = 1001;
+
+void addTrain() {
+    if (trainCount >= MAX_TRAINS) {
+        printf("Train list is full!\n");
+        return;
+    }
+    Train t;
+    printf("Enter train number: ");
+    scanf("%d", &t.trainNo);
+    getchar();
+    printf("Enter train name: ");
+    fgets(t.name, NAME_LEN, stdin);
+    t.name[strcspn(t.name, "\n")] = '\0';
+    printf("Enter source station: ");
+    fgets(t.source, NAME_LEN, stdin);
+    t.source[strcspn(t.source, "\n")] = '\0';
+    printf("Enter destination station: ");
+    fgets(t.destination, NAME_LEN, stdin);
+    t.destination[strcspn(t.destination, "\n")] = '\0';
+    printf("Enter total seats: ");
+    scanf("%d", &t.totalSeats);
+    t.availableSeats = t.totalSeats;
+
+    trains[trainCount++] = t;
+    printf("Train added successfully!\n");
+}
+
+void viewTrains() {
+    if (trainCount == 0) {
+        printf("No trains available.\n");
+        return;
+    }
+    printf("\n%-8s %-20s %-15s %-15s %-10s %-10s\n",
+           "TrainNo", "Name", "From", "To", "Total", "Available");
+    for (int i = 0; i < trainCount; i++) {
+        printf("%-8d %-20s %-15s %-15s %-10d %-10d\n",
+               trains[i].trainNo, trains[i].name, trains[i].source,
+               trains[i].destination, trains[i].totalSeats,
+               trains[i].availableSeats);
+    }
+}
+
+int findTrainIndex(int trainNo) {
+    for (int i = 0; i < trainCount; i++)
+        if (trains[i].trainNo == trainNo)
+            return i;
+    return -1;
+}
+
+void bookTicket() {
+    if (bookingCount >= MAX_PASSENGERS) {
+        printf("Booking limit reached!\n");
+        return;
+    }
+    int trainNo;
+    printf("Enter train number: ");
+    scanf("%d", &trainNo);
+    getchar();
+
+    int idx = findTrainIndex(trainNo);
+    if (idx == -1) {
+        printf("Train not found!\n");
+        return;
+    }
+
+    Booking b;
+    printf("Enter passenger name: ");
+    fgets(b.passengerName, NAME_LEN, stdin);
+    b.passengerName[strcspn(b.passengerName, "\n")] = '\0';
+    printf("Enter age: ");
+    scanf("%d", &b.age);
+    printf("Enter number of seats: ");
+    scanf("%d", &b.seats);
+
+    if (b.seats <= 0) {
+        printf("Invalid number of seats!\n");
+        return;
+    }
+    if (b.seats > trains[idx].availableSeats) {
+        printf("Only %d seats available.\n", trains[idx].availableSeats);
+        return;
+    }
+
+    trains[idx].availableSeats -= b.seats;
+    b.pnr = nextPNR++;
+    b.trainNo = trainNo;
+    b.active = 1;
+    bookings[bookingCount++] = b;
+
+    printf("Ticket booked successfully! Your PNR is %d\n", b.pnr);
+}
+
+void viewBookings() {
+    int found = 0;
+    printf("\n%-8s %-8s %-20s %-6s %-6s\n", "PNR", "Train", "Passenger", "Age", "Seats");
+    for (int i = 0; i < bookingCount; i++) {
+        if (bookings[i].active) {
+            printf("%-8d %-8d %-20s %-6d %-6d\n",
+                   bookings[i].pnr, bookings[i].trainNo,
+                   bookings[i].passengerName, bookings[i].age,
+                   bookings[i].seats);
+            found = 1;
+        }
+    }
+    if (!found)
+        printf("No active bookings.\n");
+}
+
+void cancelTicket() {
+    int pnr;
+    printf("Enter PNR to cancel: ");
+    scanf("%d", &pnr);
+
+    for (int i = 0; i < bookingCount; i++) {
+        if (bookings[i].pnr == pnr && bookings[i].active) {
+            int idx = findTrainIndex(bookings[i].trainNo);
+            if (idx != -1)
+                trains[idx].availableSeats += bookings[i].seats;
+            bookings[i].active = 0;
+            printf("Ticket with PNR %d cancelled successfully.\n", pnr);
+            return;
+        }
+    }
+    printf("No active booking found with PNR %d.\n", pnr);
+}
+
+int main() {
+    int choice;
+    while (1) {
+        printf("\n===== RAILWAY RESERVATION SYSTEM =====\n");
+        printf("1. Add Train\n");
+        printf("2. View Trains\n");
+        printf("3. Book Ticket\n");
+        printf("4. View Bookings\n");
+        printf("5. Cancel Ticket\n");
+        printf("6. Exit\n");
+        printf("Enter your choice: ");
+        scanf("%d", &choice);
+        getchar();
+
+        switch (choice) {
+            case 1: addTrain();     break;
+            case 2: viewTrains();   break;
+            case 3: bookTicket();   break;
+            case 4: viewBookings(); break;
+            case 5: cancelTicket(); break;
+            case 6:
+                printf("Thank you for using the system!\n");
+                return 0;
+            default:
+                printf("Invalid choice. Try again.\n");
+        }
+    }
+}
